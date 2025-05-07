@@ -58,14 +58,16 @@ app = FastAPI(
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "backend/static")), name="static")
 
 # Получаем URL фронтенда и админки из переменных окружения
-FRONTEND_URL = os.getenv("FRONTEND_URL")
-ADMIN_URL = os.getenv("ADMIN_URL")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "*")
+ADMIN_URL = os.getenv("ADMIN_URL", "*")
 
-origins = []
-if FRONTEND_URL:
-    origins.append(FRONTEND_URL)
-if ADMIN_URL:
-    origins.append(ADMIN_URL)
+# CORS Configuration - с поддержкой production URL
+origins = ["*"]  # Для разработки
+# Если определены URL в переменных окружения и они не "*", используем их
+if FRONTEND_URL != "*" and ADMIN_URL != "*":
+    origins = [FRONTEND_URL, ADMIN_URL]
+    # Добавляем локальные URL для разработки
+    origins.extend(["http://localhost:3000", "http://localhost:5173"])
 
 app.add_middleware(
     CORSMiddleware,
@@ -335,7 +337,7 @@ def admin_delete_content(key: str, db: Session = Depends(get_db), admin: UserDB 
     return {"detail": "Content deleted"}
 
 # Создаем папку для хранения фотографий профиля, если её нет
-PROFILE_PHOTOS_DIR = Path("static/profile_photos")
+PROFILE_PHOTOS_DIR = Path("backend/static/profile_photos")
 os.makedirs(PROFILE_PHOTOS_DIR, exist_ok=True)
 
 # API для загрузки фото профиля
@@ -544,7 +546,7 @@ async def upload_event_image(
         raise HTTPException(status_code=400, detail="Only image files are allowed")
     
     # Создаем папку для хранения изображений мероприятий
-    EVENT_IMAGES_DIR = Path("static/event_images")
+    EVENT_IMAGES_DIR = Path("backend/static/event_images")
     os.makedirs(EVENT_IMAGES_DIR, exist_ok=True)
     
     # Генерируем имя файла
