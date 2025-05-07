@@ -62,16 +62,9 @@ FRONTEND_URL = os.getenv("FRONTEND_URL", "*")
 ADMIN_URL = os.getenv("ADMIN_URL", "*")
 
 # CORS Configuration - с поддержкой production URL
-origins = ["*"]  # Для разработки
-# Если определены URL в переменных окружения и они не "*", используем их
-if FRONTEND_URL != "*" and ADMIN_URL != "*":
-    origins = [FRONTEND_URL, ADMIN_URL]
-    # Добавляем локальные URL для разработки
-    origins.extend(["http://localhost:3000", "http://localhost:5173"])
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],  # Разрешаем доступ с любого источника
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
