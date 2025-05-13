@@ -140,18 +140,7 @@ def read_users(
 ):
     users = db.query(UserDB).offset(skip).limit(limit).all()
     return users
-
-@app.get("/users/{user_id}", response_model=User)
-def read_user(
-    user_id: int, 
-    db: Session = Depends(get_db), 
-    current_user: UserDB = Depends(get_current_active_user)
-):
-    db_user = db.query(UserDB).filter(UserDB.id == user_id).first()
-    if db_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    return db_user
-
+    
 @app.get("/users/me", response_model=User)
 async def read_users_me(current_user: UserDB = Depends(get_current_active_user)):
     return current_user
@@ -192,6 +181,17 @@ async def update_user_info(
     db.refresh(current_user)
     
     return current_user
+    
+@app.get("/users/{user_id}", response_model=User)
+def read_user(
+    user_id: int, 
+    db: Session = Depends(get_db), 
+    current_user: UserDB = Depends(get_current_active_user)
+):
+    db_user = db.query(UserDB).filter(UserDB.id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return db_user
 
 # --- Эндпоинты для работы с профилем пользователя ---
 # Эндпоинт для получения профиля пользователя
